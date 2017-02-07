@@ -25,7 +25,6 @@
 // 	ko.applyBindings(viewModel);
 // }
 
-		
 
 ko.bindingHandlers.marker = {
 
@@ -76,17 +75,38 @@ $(document).ready(function(){
 	    };
 	    var map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
+	    // var viewModel = {
+	    //     locations: ko.observableArray([
+	    //     	{ name: "Mondavi Center", lat: 38.5346, lng: -121.7488 },
+	    //     	{ name: "Manetti Shrem Museum", lat: 38.5335, lng: -121.7479 },
+	    //     	{ name: "International House", lat: 38.5465, lng: -121.7505 },
+	    //     	{ name: "The ARC & Pavilion", lat: 38.5428, lng: -121.7592 },
+	    //     	{ name: "Silo", lat: 38.5386, lng: -121.7531 },
+	    //     	{ name: "Bohart Museum of Entomology", lat: 38.5354, lng: -121.7527 }
+	    //     ]),
+	    //     mapControl: map,
+	    // };
+
 	    var viewModel = {
-	        locations: ko.observableArray([
+	        locations: [
 	        	{ name: "Mondavi Center", lat: 38.5346, lng: -121.7488 },
 	        	{ name: "Manetti Shrem Museum", lat: 38.5335, lng: -121.7479 },
 	        	{ name: "International House", lat: 38.5465, lng: -121.7505 },
 	        	{ name: "The ARC & Pavilion", lat: 38.5428, lng: -121.7592 },
 	        	{ name: "Silo", lat: 38.5386, lng: -121.7531 },
 	        	{ name: "Bohart Museum of Entomology", lat: 38.5354, lng: -121.7527 }
-	        ]),
-	        mapControl: map
+	        ],
+	        mapControl: map,
+	        Query: ko.observable('')
 	    };
+
+	    // search function to filter through available locations
+	    viewModel.searchResults = ko.computed(function() {
+	    	var search = viewModel.Query();
+		    return viewModel.locations.filter(function(location) {
+		      return location.name.toLowerCase().indexOf(search) >= 0;
+		    });
+		}, viewModel);
 
 	    ko.applyBindings(viewModel);
 	});
