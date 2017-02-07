@@ -8,3 +8,7 @@ html, body {
 	height: 100%;
 	margin: 0;
 }
+
+.info-title {
+	font-weight: bold;
+}
