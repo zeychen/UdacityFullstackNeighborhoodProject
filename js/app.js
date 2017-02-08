@@ -3,10 +3,10 @@ $(document).ready(function(){
 	var mapMarkers = function(name, lat, long) {
 		var self = this;
 		var marker, latLng;
+
 		self.name = ko.observable(name);
 		self.lat = ko.observable(lat);
 		self.long = ko.observable(long);
-
 
 		latLng = new google.maps.LatLng(lat, long);
 
@@ -15,11 +15,9 @@ $(document).ready(function(){
             position: latLng,
             map: map,
             animation: google.maps.Animation.DROP,
-            title: name,
         };
         self.marker = new google.maps.Marker(request);
         
-
         // set marker to visible if in search list
         self.isVisible = ko.observable(false);
         self.isVisible.subscribe(function(currentState) {
@@ -31,9 +29,8 @@ $(document).ready(function(){
 		});
 		self.isVisible(true);
 
-		// infowindow
+		// infowindow setting
 		self.contentString = '<div class="info-title">' + name + '</div>';
-
 
 		// open info window for location marker
 		self.infowindow = new google.maps.InfoWindow({
@@ -41,6 +38,7 @@ $(document).ready(function(){
 		});
 
         this.openInfoWindow = function() {
+        	self.marker.setAnimation(google.maps.Animation.DROP);
 	        // close all info window to ensure one info window is open at a time
 	        for (var i = 0; i < locationsModel.locations().length; i++) {
 	            locationsModel.locations()[i].infowindow.close();
