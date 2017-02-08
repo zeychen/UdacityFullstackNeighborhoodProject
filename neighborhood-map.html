@@ -20,24 +20,16 @@
 </head>
 	<body>
 
-		<input class="form-control" data-bind="value: Query, valueUpdate: 'keyup'" autocomplete="off">
+		<input class="form-control" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off">
 
 		<h3>Search results:</h3>
 		<ul data-bind="foreach: searchResults">
 		  <li data-bind="text: name"></li>
-		  <!-- <button data-bind="click: openInfoWindow">Open Info</button> -->
 		</ul>
-
-<!-- 		<h3>All items:</h3>
-		<ul data-bind="foreach: locations">
-		  <li data-bind="text: name"></li>
-		</ul> -->
 
 		<!-- <input id="search-bar" placeholder="Search..." /> -->
 		<div id="map"></div>
-		<!-- ko foreach: locations -->
-	     <span data-bind="marker: {location: $data}"></span>
-		<!-- /ko -->
+
 
 	    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 	    <script src="http://knockoutjs.com/downloads/knockout-3.4.0.js"></script>

@@ -26,102 +26,216 @@
 // }
 
 
-ko.bindingHandlers.marker = {
+// ko.bindingHandlers.marker = {
 
-    init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-        var map = bindingContext.$parent.mapControl;
-        var location = valueAccessor().location;
-        var latLng = new google.maps.LatLng(location.lat, location.lng);
+//     init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+//     	var self = this;
+//         var map = bindingContext.$parent.mapControl;
+//         var location = valueAccessor().location;
+//         var latLng = new google.maps.LatLng(location.lat, location.lng);
+//         // var visibleMarkers = ko.observableArray([]);
+
+//         console.log(bindingContext)
+//         console.log(valueAccessor())
+
+//         // display marker
+//         var request = {
+//             position: latLng,
+//             map: map,
+//             animation: google.maps.Animation.DROP,
+//             title: location.name,
+//         	query: location.name
+//         };
+//         var marker = new google.maps.Marker(request);
+
+//         marker.addListener('click', function () {
+//             ko.bindingHandlers.marker.openInfoWindow(map, marker, request);
+//         });
+//     },
+
+//     openInfoWindow: function (map, marker, request) {
+//     	var self = this;
+//     	var places = new google.maps.places.PlacesService(map);
+//     	places.textSearch(request, callback);
+
+//     	function callback(result, status) {
+// 			if (status == google.maps.places.PlacesServiceStatus.OK) {
+// 				// console.log(result[0]);
+// 				// console.log(result[0].photos);
+
+// 		        var contentString = '<div class="info-title">' + result[0].name + '</div>'
+// 		        	+ '<div>' + result[0].rating + '</div>';
+// 		        if (self.infowindow) {
+// 		            self.infowindow.close();
+// 		        };
+// 		        // display info window
+// 		        self.infowindow = new google.maps.InfoWindow({
+// 		            content: contentString
+// 		        });
+// 		        // zoom in on map when clicked
+// 		        // map.setZoom(16);
+// 		        // change view to satellite when info window is open
+// 		        // map.setMapTypeId('hybrid');
+// 		        // center map to location when info window open
+// 		        map.panTo(marker.getPosition());
+// 		        self.infowindow.open(map, marker);
+// 		        google.maps.event.addListener(self.infowindow, 'closeclick', function () {
+// 		            map.setZoom(15);
+// 		            map.setCenter(marker.getPosition());
+// 		            map.setMapTypeId('terrain');
+// 		        });
+// 			}
+//     	}
+//     }
+// };
+
+
+$(document).ready(function(){
+	// map marker data model
+	var mapMarkers = function(name, lat, long) {
+		var self = this;
+		var marker, latLng;
+		self.name = ko.observable(name);
+		self.lat = ko.observable(lat);
+		self.long = ko.observable(long);
+
+
+		latLng = new google.maps.LatLng(lat, long);
+
         // display marker
         var request = {
             position: latLng,
             map: map,
             animation: google.maps.Animation.DROP,
-            title: location.name,
-        	query: location.name
+            title: name,
         };
-        var marker = new google.maps.Marker(request);
+        self.marker = new google.maps.Marker(request);
 
-        marker.addListener('click', function () {
-            ko.bindingHandlers.marker.openInfoWindow(map, marker, request);
-        });
-    },
-
-    openInfoWindow: function (map, marker, request) {
-    	var self = this;
-    	var places = new google.maps.places.PlacesService(map);
-    	places.textSearch(request, callback);
-
-    	function callback(result, status) {
-			if (status == google.maps.places.PlacesServiceStatus.OK) {
-				console.log(result[0]);
-				console.log(result[0].photos);
-
-		        var contentString = '<div class="info-title">' + result[0].name + '</div>'
-		        	+ '<div>' + result[0].rating + '</div>';
-		        if (self.infowindow) {
-		            self.infowindow.close();
-		        };
-		        // display info window
-		        self.infowindow = new google.maps.InfoWindow({
-		            content: contentString
-		        });
-		        // zoom in on map when clicked
-		        map.setZoom(18);
-		        // change view to satellite when info window is open
-		        // map.setMapTypeId('hybrid');
-		        // center map to location when info window open
-		        map.panTo(marker.getPosition());
-		        self.infowindow.open(map, marker);
-		        google.maps.event.addListener(self.infowindow, 'closeclick', function () {
-		            map.setZoom(15);
-		            map.setCenter(marker.getPosition());
-		            map.setMapTypeId('terrain');
-		        });
+        self.isVisible = ko.observable(false);
+        self.isVisible.subscribe(function(currentState) {
+			if (currentState) {
+				self.marker.setMap(map);
+			} else {
+				self.marker.setMap(null);
 			}
-    	}
-    }
-};
+		});
 
-$(document).ready(function(){
+		self.isVisible(true);
 
-	// google.maps.event.addDomListener(window, 'load', function () {
-	    var mapOptions = {
-            zoom: 15,
-            center: new google.maps.LatLng(38.5386, -121.7531),
-            mapTypeId: google.maps.MapTypeId.TERRAIN
-	    };
+        // display info window
+        self.infoWindow = function() {
+        	var contentString = '<div class="info-title">' + name + '</div>';
+	        if (self.infowindow) {
+	            self.infowindow.close();
+	        };
+	        // display info window
+	        self.infowindow = new google.maps.InfoWindow({
+	            content: contentString
+	        });
+	        // center map to location when info window open
+	        map.panTo(self.marker.getPosition());
 
-	    var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+	        google.maps.event.addListener(self.infowindow, 'closeclick', function () {
+	            map.setZoom(15);
+	            // map.setCenter(self.marker.getPosition());
+	            map.setMapTypeId('terrain');
+	        });
 
-	    var viewModel = {
-	        locations: [
-	        	{ name: "Mondavi Center", lat: 38.5346, lng: -121.7488 },
-	        	{ name: "Manetti Shrem Museum", lat: 38.5335, lng: -121.7479 },
-	        	{ name: "International House", lat: 38.5465, lng: -121.7505 },
-	        	{ name: "The ARC & Pavilion", lat: 38.5428, lng: -121.7592 },
-	        	{ name: "Silo", lat: 38.5386, lng: -121.7531 },
-	        	{ name: "Bohart Museum of Entomology", lat: 38.5354, lng: -121.7527 }
-	        ],
-	        mapControl: map,
-	        Query: ko.observable('')
-	    };
+	        // self.marker.addListener('click', function() {
+	        // 	self.infowindow.open(map, marker);
+	        // });
+	        // self.infowindow.open(map, marker);
+        }
+        self.addListener = google.maps.event.addListener(self.marker, 'click', (self.infoWindow));
 
-	    // search function to filter through available locations
-	    viewModel.searchResults = ko.computed(function() {
-	    	var search = viewModel.Query();
-		    return viewModel.locations.filter(function(location) {
-		      return location.name.toLowerCase().indexOf(search) >= 0;
-		    });
-		}, viewModel);
+        // marker.addListener('click', function () {
+        //     ko.bindingHandlers.marker.openInfoWindow(map, marker, request);
+        // });
+	}
 
-	    ko.applyBindings(viewModel);
-	// });
+	// Google map
+    var mapOptions = {
+        zoom: 15,
+        center: new google.maps.LatLng(38.5386, -121.7531),
+        mapTypeId: google.maps.MapTypeId.TERRAIN
+    };
+
+    var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+    // locations view model
+    var locationsModel = {
+        locations: ko.observableArray([
+        	new mapMarkers ('Mondavi Center', '38.5346', '-121.7488' ),
+        	new mapMarkers ('Manetti Shrem Museum', '38.5335', '-121.7479' ),
+        	new mapMarkers ('International House', '38.5465', '-121.7505'),
+        	new mapMarkers ('The ARC & Pavilion', '38.5428', '-121.7592'),
+        	new mapMarkers ('Silo', '38.5386', '-121.7531'),
+        	new mapMarkers ('Bohart Museum of Entomology', '38.5354', '-121.7527'),
+        ]),
+        mapControl: map,
+        query: ko.observable(''),
+    };
+
+    // search function to filter through available locations
+    locationsModel.searchResults = ko.computed(function() {
+    	var search = locationsModel.query().toLowerCase();
+    	// display marker of search results
+    	return ko.utils.arrayFilter(locationsModel.locations(), function (location) {
+	        var doesMatch = location.name().toLowerCase().indexOf(search) >= 0;
+	        location.isVisible(doesMatch);
+	        return doesMatch;
+	    });
+    });
+
+
+ //    	var searchLocations = locationsModel.locations.filter(function(location) {
+	//     	return location.name().toLowerCase().indexOf(search) >= 0;
+	//     });
+ //    	console.log(searchLocations)
+	//     return searchLocations;
+	// }, locationsModel);
+
+    ko.applyBindings(locationsModel);
+
+    // // locations view model
+    // var locationsModel = {
+    //     locations: [
+    //     	{ name: "Mondavi Center", lat: 38.5346, lng: -121.7488 },
+    //     	{ name: "Manetti Shrem Museum", lat: 38.5335, lng: -121.7479 },
+    //     	{ name: "International House", lat: 38.5465, lng: -121.7505 },
+    //     	{ name: "The ARC & Pavilion", lat: 38.5428, lng: -121.7592 },
+    //     	{ name: "Silo", lat: 38.5386, lng: -121.7531 },
+    //     	{ name: "Bohart Museum of Entomology", lat: 38.5354, lng: -121.7527 }
+    //     ],
+    //     mapControl: map,
+    //     query: ko.observable(''),
+
+    // };
+
+
+
+
+    // visible marker array
+    // var visibleMarkers = ko.observableArray([]);
+
+    // viewModel.visibleMarkers
+
+
+    // if search result == location name then open info window on click
+
+
+// locationsModel.search = ko.dependentObservable(function() {
+//     var self = this;
+//     var search = self.query().toLowerCase();
+//     // console.log(location)
+//     return ko.utils.arrayFilter(self.locations, function(location) {
+//     	console.log(location.name())
+//         return location.name().toLowerCase().indexOf(search) >= 0;
+//     });
+// }, locationsModel);
+
+
 })
-
-
-
-
 
 
 
@@ -130,6 +244,7 @@ $(document).ready(function(){
 http://stackoverflow.com/questions/32899466/using-knockout-js-and-google-maps-api
 http://jsfiddle.net/stesta/2T3Db/
 http://jsfiddle.net/Wt3B8/23/
+http://stackoverflow.com/questions/29557938/removing-map-pin-with-search
 */
 
 
