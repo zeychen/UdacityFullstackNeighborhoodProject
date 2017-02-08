@@ -18,6 +18,7 @@ $(document).ready(function(){
             title: name,
         };
         self.marker = new google.maps.Marker(request);
+        
 
         // set marker to visible if in search list
         self.isVisible = ko.observable(false);
@@ -30,36 +31,37 @@ $(document).ready(function(){
 		});
 		self.isVisible(true);
 
-        // display info window
-        self.infoWindow = function() {
-        	var contentString = '<div class="info-title">' + name + '</div>';
-	        if (self.infowindow) {
-	            self.infowindow.close();
-	        };
+		// infowindow
+		self.contentString = '<div class="info-title">' + name + '</div>';
 
-	        // display info window
-	        self.infowindow = new google.maps.InfoWindow({
-	            content: contentString
-	        });
-	        self.infowindow.close();
+
+		// open info window for location marker
+		self.infowindow = new google.maps.InfoWindow({
+			content: self.contentString
+		});
+
+        this.openInfoWindow = function() {
+	        // close all info window to ensure one info window is open at a time
+	        for (var i = 0; i < locationsModel.locations().length; i++) {
+	            locationsModel.locations()[i].infowindow.close();
+	        }
+
+	        // open info window
+	        self.infowindow.open(map, self.marker);
+
 	        // center map to location when info window open
 	        map.panTo(self.marker.getPosition());
 
-	        // open info window at marker
-	        self.infowindow.open(map, self.marker);
-
 	        // close info window
 	        google.maps.event.addListener(self.infowindow, 'closeclick', function () {
-	            // map.setZoom(15);
 	            map.panTo(self.marker.getPosition());
-	            // map.setMapTypeId('terrain');
 	        });
 
 	        google.maps.event.addListener(map, 'click', function () {
 	            self.infowindow.close();
 	        });
         }
-        self.addListener = google.maps.event.addListener(self.marker, 'click', (self.infoWindow));
+        this.addListener = google.maps.event.addListener(self.marker, 'click', (this.openInfoWindow));
 	}
 
 	// Google map
@@ -102,9 +104,6 @@ $(document).ready(function(){
 
 
 /* citations
-
 http://stackoverflow.com/questions/32899466/using-knockout-js-and-google-maps-api
-http://jsfiddle.net/stesta/2T3Db/
-http://jsfiddle.net/Wt3B8/23/
 http://stackoverflow.com/questions/29557938/removing-map-pin-with-search
 */
