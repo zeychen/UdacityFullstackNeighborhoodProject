@@ -9,8 +9,6 @@
 
     <link href='https://fonts.googleapis.com/css?family=Voltaire' rel='stylesheet' type='text/css'>
 
-    <!-- <link href="css/style.css" rel="stylesheet" /> -->
-
 
     
     <!-- Materialize compiled and minified CSS -->
@@ -19,8 +17,7 @@
 	
 </head>
 	<body>
-
-		<input class="form-control" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" placeholder="Search..." >
+		<input class="search" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" placeholder="Search..." >
 
 		<h3>Search results:</h3>
 		<ul data-bind="foreach: searchResults">

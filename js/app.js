@@ -1,4 +1,19 @@
 $(document).ready(function(){
+	// Google map
+    var mapOptions = {
+        zoom: 15,
+        center: new google.maps.LatLng(38.5386, -121.7531),
+        mapTypeId: google.maps.MapTypeId.TERRAIN
+    };
+
+    var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+    // info window
+    var contentString = '<div class="info-title">' + name + '</div>';
+
+    var infowindow = new google.maps.InfoWindow();
+
+
 	// map marker data model
 	var mapMarkers = function(name, lat, long) {
 		var self = this;
@@ -17,10 +32,11 @@ $(document).ready(function(){
             animation: google.maps.Animation.DROP,
         };
         self.marker = new google.maps.Marker(request);
-        
-        // set marker to visible if in search list
+
+		// set marker to visible if in search list
         self.isVisible = ko.observable(false);
         self.isVisible.subscribe(function(currentState) {
+        	infowindow.close();
 			if (currentState) {
 				self.marker.setMap(map);
 			} else {
@@ -29,47 +45,32 @@ $(document).ready(function(){
 		});
 		self.isVisible(true);
 
-		// infowindow setting
-		self.contentString = '<div class="info-title">' + name + '</div>';
-
-		// open info window for location marker
-		self.infowindow = new google.maps.InfoWindow({
-			content: self.contentString
-		});
-
         this.openInfoWindow = function() {
         	self.marker.setAnimation(google.maps.Animation.DROP);
 	        // close all info window to ensure one info window is open at a time
 	        for (var i = 0; i < locationsModel.locations().length; i++) {
-	            locationsModel.locations()[i].infowindow.close();
+	            infowindow.close();
 	        }
 
 	        // open info window
-	        self.infowindow.open(map, self.marker);
+	        infowindow.open(map, self.marker);
 
 	        // center map to location when info window open
 	        map.panTo(self.marker.getPosition());
 
 	        // close info window
-	        google.maps.event.addListener(self.infowindow, 'closeclick', function () {
+	        google.maps.event.addListener(infowindow, 'closeclick', function () {
 	            map.panTo(self.marker.getPosition());
 	        });
 
 	        google.maps.event.addListener(map, 'click', function () {
-	            self.infowindow.close();
+	            infowindow.close();
 	        });
         }
         this.addListener = google.maps.event.addListener(self.marker, 'click', (this.openInfoWindow));
 	}
 
-	// Google map
-    var mapOptions = {
-        zoom: 15,
-        center: new google.maps.LatLng(38.5386, -121.7531),
-        mapTypeId: google.maps.MapTypeId.TERRAIN
-    };
 
-    var map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
     // locations view model
     var locationsModel = {
