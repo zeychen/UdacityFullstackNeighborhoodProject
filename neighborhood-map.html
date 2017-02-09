@@ -24,7 +24,10 @@
 				<input id="search-bar" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" placeholder="Search for a place..." />
 
 				<ul class="search-list" data-bind="foreach: searchResults">
-					<li class="search-results"><i class="fa fa-map-marker"></i> <span data-bind="text: name, event: { mouseover: openInfoWindow, click: openInfoWindow }"></span></li>
+					<li class="search-results" data-bind="event: { mouseover: openInfoWindow }">
+						<i class="fa fa-map-marker"></i> 
+						<span data-bind="text: name"></span>
+					</li>
 				</ul>
 			</div>
 		</div>
