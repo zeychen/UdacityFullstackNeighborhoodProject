@@ -66,25 +66,26 @@ $(document).ready(function(){
 
 			}).done(function(){
 
-				self.content = '<h3>5 Most Recent Comments</h3>' + '<ol class="tips">' + topTips.join('') + '</ol>';
+				self.comments = '<h3>5 Most Recent Comments</h3>' + '<ol class="tips">' + topTips.join('') + '</ol>';
 			}).fail(function(jqXHR, textStatus, errorThrown) {
-				self.content = '<h3>5 Most Recent Comments</h3>' + '<h4>Oops. There was a problem retrieving this location\'s comments.</h4>';				
+				self.comments = '<h3>5 Most Recent Comments</h3>' + '<h4>Oops. There was a problem retrieving this location\'s comments.</h4>';				
 				console.log('getJSON request failed! ' + textStatus);
 			});
 
 
-			// $.getJSON(foursquarephotos,
-			// 	function(data) {
-			// 		console.log(data.response)
-			// 		$.each(data.response.photos.items, function(i, photos){
-			// 		// photos.push('<li>' + photos.text + '</li>');
-			// 	});
-			// }).done(function(){
-			// 	self.content = '<h3>5 Most Recent Comments</h3>' + '<ol class="tips">' + photos.join('') + '</ol>';
-			// }).fail(function(jqXHR, textStatus, errorThrown) {
-			// 	self.content = '<h3>5 Most Recent Comments</h3>' + '<h4>Oops. There was a problem retrieving this location\'s comments.</h4>';				
-			// 	console.log('getJSON request failed! ' + textStatus);
-			// });
+			$.getJSON(foursquarephotos,
+			function(data) {
+				console.log(data.response.photos.items)
+				$.each(data.response.photos.items, function(i, photos){
+					self.photo = photos.prefix + '200x200' + photos.suffix;
+					console.log(self.photo);
+				});
+			}).done(function(){
+				self.photos = '<img src="' + self.photo + '">';
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+				self.photos = '<h4>Oops. There was a problem retrieving this location\'s photos.</h4>';				
+				console.log('getJSON request failed! ' + textStatus);
+			});
 		}();
 
 		// open info window
@@ -98,7 +99,8 @@ $(document).ready(function(){
 
 	        // info window parameters
     		var contentString = '<h2 class="info-title">' + name + '</h2>' +
-    			'<div class="info-photos">' + self.content + '</div>';
+    			'<div class="info-comments">' + self.comments + '</div>' +
+    			'<div class="info-photos">' + self.photos + '</div>';
 
 	        infowindow.setContent(contentString);
 	        infowindow.open(map, self.marker);
