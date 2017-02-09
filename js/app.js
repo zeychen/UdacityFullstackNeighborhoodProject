@@ -8,8 +8,7 @@ $(document).ready(function(){
 
     var map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
-    // info window
-    var contentString = '<div class="info-title">' + name + '</div>';
+
 
     var infowindow = new google.maps.InfoWindow();
 
@@ -47,10 +46,16 @@ $(document).ready(function(){
 
         this.openInfoWindow = function() {
         	self.marker.setAnimation(google.maps.Animation.DROP);
+        			// info window
+    		var contentString = '<div class="info-title">' + name + '</div>';
+
 	        // close all info window to ensure one info window is open at a time
 	        for (var i = 0; i < locationsModel.locations().length; i++) {
 	            infowindow.close();
 	        }
+
+	        // infowindow.setContent(content: contentString);
+	        infowindow.setContent(contentString);
 
 	        // open info window
 	        infowindow.open(map, self.marker);
