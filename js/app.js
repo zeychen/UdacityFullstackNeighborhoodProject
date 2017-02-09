@@ -95,6 +95,8 @@ $(document).ready(function(){
 	    });
     });
 
+    
+
     ko.applyBindings(locationsModel);
 })
 
