@@ -8,10 +8,8 @@ $(document).ready(function(){
 
     var map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
-
-
+    // initialize info window
     var infowindow = new google.maps.InfoWindow();
-
 
 	// map marker data model
 	var mapMarkers = function(name, lat, long) {
@@ -46,18 +44,15 @@ $(document).ready(function(){
 
         this.openInfoWindow = function() {
         	self.marker.setAnimation(google.maps.Animation.DROP);
-        			// info window
-    		var contentString = '<div class="info-title">' + name + '</div>';
 
 	        // close all info window to ensure one info window is open at a time
 	        for (var i = 0; i < locationsModel.locations().length; i++) {
 	            infowindow.close();
 	        }
 
-	        // infowindow.setContent(content: contentString);
+	        // info window parameters
+    		var contentString = '<div class="info-title">' + name + '</div>';
 	        infowindow.setContent(contentString);
-
-	        // open info window
 	        infowindow.open(map, self.marker);
 
 	        // center map to location when info window open
@@ -74,8 +69,6 @@ $(document).ready(function(){
         }
         this.addListener = google.maps.event.addListener(self.marker, 'click', (this.openInfoWindow));
 	}
-
-
 
     // locations view model
     var locationsModel = {
