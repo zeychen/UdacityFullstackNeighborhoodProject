@@ -12,15 +12,19 @@ $(document).ready(function(){
     var infowindow = new google.maps.InfoWindow();
 
 	// map marker data model
-	var mapMarkers = function(name, lat, long) {
+	var mapMarkers = function(name, lat, long, foursquareid) {
 		var self = this;
 		var marker, latLng;
+		var foursquareurl;
 
 		self.name = ko.observable(name);
 		self.lat = ko.observable(lat);
 		self.long = ko.observable(long);
+		self.foursquareid = ko.observable(foursquareid);
 
 		latLng = new google.maps.LatLng(lat, long);
+
+		
 
         // display marker
         var request = {
@@ -42,6 +46,48 @@ $(document).ready(function(){
 		});
 		self.isVisible(true);
 
+		// get place info from four square
+		this.getContent = function() {
+
+
+			// self.topTips = ko.observableArray([]);
+			var topTips = [];
+			var photos = [];
+			var foursquareurl = 'https://api.foursquare.com/v2/venues/' + foursquareid + '/tips?sort=recent&limit=5&v=20150609&client_id=4EPS21I4V4MVCYXWDT4QNZZG1JETWZ2LIJMYQ34FNBWZ1RMV&client_secret=U3P1XLU204VMYO4BHGIWPDOY130Z1AFTT1OQTI2TY0HW0T43';
+			var foursquarephotos = 'https://api.foursquare.com/v2/venues/' + foursquareid + '/photos?sort=recent&limit=5&v=20150609&client_id=4EPS21I4V4MVCYXWDT4QNZZG1JETWZ2LIJMYQ34FNBWZ1RMV&client_secret=U3P1XLU204VMYO4BHGIWPDOY130Z1AFTT1OQTI2TY0HW0T43';
+			// console.log(foursquareurl)
+			// return foursquareurl;
+
+			$.getJSON(foursquareurl,
+				function(data) {
+				$.each(data.response.tips.items, function(i, tips){
+					topTips.push('<li>' + tips.text + '</li>');
+			});
+
+			}).done(function(){
+
+				self.content = '<h3>5 Most Recent Comments</h3>' + '<ol class="tips">' + topTips.join('') + '</ol>';
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+				self.content = '<h3>5 Most Recent Comments</h3>' + '<h4>Oops. There was a problem retrieving this location\'s comments.</h4>';				
+				console.log('getJSON request failed! ' + textStatus);
+			});
+
+
+			// $.getJSON(foursquarephotos,
+			// 	function(data) {
+			// 		console.log(data.response)
+			// 		$.each(data.response.photos.items, function(i, photos){
+			// 		// photos.push('<li>' + photos.text + '</li>');
+			// 	});
+			// }).done(function(){
+			// 	self.content = '<h3>5 Most Recent Comments</h3>' + '<ol class="tips">' + photos.join('') + '</ol>';
+			// }).fail(function(jqXHR, textStatus, errorThrown) {
+			// 	self.content = '<h3>5 Most Recent Comments</h3>' + '<h4>Oops. There was a problem retrieving this location\'s comments.</h4>';				
+			// 	console.log('getJSON request failed! ' + textStatus);
+			// });
+		}();
+
+		// open info window
         this.openInfoWindow = function() {
         	self.marker.setAnimation(google.maps.Animation.DROP);
 
@@ -51,7 +97,9 @@ $(document).ready(function(){
 	        }
 
 	        // info window parameters
-    		var contentString = '<div class="info-title">' + name + '</div>';
+    		var contentString = '<h2 class="info-title">' + name + '</h2>' +
+    			'<div class="info-photos">' + self.content + '</div>';
+
 	        infowindow.setContent(contentString);
 	        infowindow.open(map, self.marker);
 
@@ -73,12 +121,12 @@ $(document).ready(function(){
     // locations view model
     var locationsModel = {
         locations: ko.observableArray([
-        	new mapMarkers ('Mondavi Center', '38.5346', '-121.7488' ),
-        	new mapMarkers ('Manetti Shrem Museum', '38.5335', '-121.7479' ),
-        	new mapMarkers ('International House', '38.5465', '-121.7505'),
-        	new mapMarkers ('The ARC & Pavilion', '38.5428', '-121.7592'),
-        	new mapMarkers ('Silo', '38.5386', '-121.7531'),
-        	new mapMarkers ('Bohart Museum of Entomology', '38.5354', '-121.7527'),
+        	new mapMarkers ('Mondavi Center', '38.5346', '-121.7488', '4b0586baf964a520946b22e3' ),
+        	new mapMarkers ('Memorial Union Art Gallery', '38.542154', '-121.7520577', '4b9d1b0ff964a5202f9036e3' ),
+        	new mapMarkers ('International House', '38.5465', '-121.7505', '4ba1c28ff964a5203acb37e3'),
+        	new mapMarkers ('The ARC & Pavilion', '38.5428', '-121.7592', '4d44f11de198721ea379c18b'),
+        	new mapMarkers ('Silo', '38.5386', '-121.7531', '4b687e41f964a520f97b2be3'),
+        	new mapMarkers ('Bohart Museum of Entomology', '38.5354', '-121.7527', '4bd7111e5631c9b69bdda630'),
         ]),
         mapControl: map,
         query: ko.observable(''),
@@ -95,7 +143,7 @@ $(document).ready(function(){
 	    });
     });
 
-    
+
 
     ko.applyBindings(locationsModel);
 })
