@@ -1,8 +1,8 @@
-$(document).ready(function(){
+function initMap(){
 	// Google map
 	var mapOptions = {
-		zoom: 15,
-		center: new google.maps.LatLng(38.5386, -121.7531),
+		zoom: MAPZOOMINIT,
+		center: new google.maps.LatLng(LATINIT, LONGINIT),
 		mapTypeId: google.maps.MapTypeId.TERRAIN
 	};
 
@@ -19,10 +19,10 @@ $(document).ready(function(){
 		var marker, latLng;
 		var foursquareurl;
 
-		self.name = ko.observable(name);
-		self.lat = ko.observable(lat);
-		self.long = ko.observable(long);
-		self.foursquareid = ko.observable(foursquareid);
+		self.name = name;
+		self.lat = lat;
+		self.long = long;
+		self.foursquareid = foursquareid;
 
 		latLng = new google.maps.LatLng(lat, long);
 
@@ -39,68 +39,61 @@ $(document).ready(function(){
 		self.isVisible.subscribe(function(currentState) {
 			infoWindow.close();
 			if (currentState) {
-				self.marker.setMap(map);
+				self.marker.setVisible(currentState);
 			} else {
-				self.marker.setMap(null);
+				self.marker.setVisible(false);
 			}
 		});
 		self.isVisible(true);
 
 		// get place info from four square
 		this.getContent = function() {
-			var topTips = [];
-			var recPhotos = [];
-			var foursquareurl = 'https://api.foursquare.com/v2/venues/' + 
-								foursquareid + 
-								'/tips?sort=recent&limit=5&v=20150609&' + 
-								'client_id=4EPS21I4V4MVCYXWDT4QNZZG1JE' +
-								'TWZ2LIJMYQ34FNBWZ1RMV&client_secret=U' +
-								'3P1XLU204VMYO4BHGIWPDOY130Z1AFTT1OQTI' +
-								'2TY0HW0T43';
-			var foursquarephotos = 'https://api.foursquare.com/v2/venues/' + 
-									foursquareid + 
-									'/photos?sort=recent&limit=5&v=201506' +
-									'09&client_id=4EPS21I4V4MVCYXWDT4QNZZ' +
-									'G1JETWZ2LIJMYQ34FNBWZ1RMV&client_sec' +
-									'ret=U3P1XLU204VMYO4BHGIWPDOY130Z1AFT' +
-									'T1OQTI2TY0HW0T43';
+			self.topTips = [];
+			self.recPhotos = [];
+			self.foursquareurl = venueUrl + foursquareid + 
+								'/tips?sort=recent&limit=5&v=20150609' + 
+								'&client_id=' + clientId +
+								'&client_secret=' + clientSecret;
+			self.foursquarephotos = venueUrl + foursquareid + 
+									'/photos?sort=recent&limit=5&v=20150609' +
+									'&client_id=' + clientId +
+									'&client_secret=' + clientSecret;
 
 			// get Four Square tips of venue
-			$.getJSON(foursquareurl,
+			$.getJSON(self.foursquareurl,
 				function(data) {
-				$.each(data.response.tips.items, function(i, tips){
-					topTips.push('<li class="tips-results">' + 
+				data.response.tips.items.forEach(function(tips) {
+					self.topTips.push('<li class="tips-results">' + 
 								 '<i class="fa-li fa fa-comments-o"></i>' + 
 								 tips.text + '</li>');
-			});
-
+				})
 			}).done(function(){
-				if (topTips.length > 0) {
+				if (self.topTips.length > 0) {
 					self.comments = '<h3>5 Most Recent Comments</h3>' + 
-									'<ul class="fa-ul">' + topTips.join('') +
+									'<ul class="fa-ul">' + self.topTips.join('') +
 									'</ul>';
 				} else {
 					self.comments = '<h3>No Recent Comments</h3>';
 				}
 				
-			}).fail(function(jqXHR, textStatus, errorThrown) {
+			}).fail(function() {
 				self.comments = '<h3>5 Most Recent Comments</h3>' + 
 								'<h4>Oops. There was a problem retrieving' +
 								'this location\'s comments.</h4>';				
-				console.log('getJSON request failed! ' + textStatus);
+				console.log('getJSON request failed! ' + self.textStatus);
 			});
 
 			// get Four Square Photos of venue
-			$.getJSON(foursquarephotos,
+			$.getJSON(self.foursquarephotos,
 				function(data) {
-				$.each(data.response.photos.items, function(i, photos){
-					self.photo = photos.prefix + '100x100' + photos.suffix;
+				data.response.photos.items.forEach(function(photos) {
+						self.photo = photos.prefix + '100x100' + photos.suffix;
 					self.photoNum = data.response.photos.items.length;
-					recPhotos.push('<img src="' + self.photo + '">');
+					self.recPhotos.push('<img src="' + self.photo + '">');
 				});
 			}).done(function(){
-				if (recPhotos.length > 0) {
-					self.photos = recPhotos.join('');
+				if (self.recPhotos.length > 0) {
+					self.photos = self.recPhotos.join('');
 				} else {
 					self.photos = '';
 				}
@@ -194,11 +187,17 @@ $(document).ready(function(){
 		var search = locationsModel.query().toLowerCase();
 		// display marker of search results
 		return ko.utils.arrayFilter(locationsModel.locations(), function (location) {
-			var doesMatch = location.name().toLowerCase().indexOf(search) >= 0;
+			var doesMatch = location.name.toLowerCase().indexOf(search) >= 0;
 			location.isVisible(doesMatch);
 			return doesMatch;
 		});
 	});
 
 	ko.applyBindings(locationsModel);
-})
+}
+
+function googleError() {
+	$('.error').append('There was an error while loading Google Maps.' +
+					   'Please refresh page and try again.');
+	location.reload;
+}
