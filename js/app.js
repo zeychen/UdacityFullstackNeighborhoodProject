@@ -9,7 +9,9 @@ $(document).ready(function(){
     var map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
     // initialize info window
-    var infowindow = new google.maps.InfoWindow();
+    var infowindow = new google.maps.InfoWindow({
+    	maxWidth: 500
+    });
 
 	// map marker data model
 	var mapMarkers = function(name, lat, long, foursquareid) {
@@ -23,8 +25,6 @@ $(document).ready(function(){
 		self.foursquareid = ko.observable(foursquareid);
 
 		latLng = new google.maps.LatLng(lat, long);
-
-		
 
         // display marker
         var request = {
@@ -48,40 +48,51 @@ $(document).ready(function(){
 
 		// get place info from four square
 		this.getContent = function() {
-
-
-			// self.topTips = ko.observableArray([]);
 			var topTips = [];
-			var photos = [];
+			var recPhotos = [];
 			var foursquareurl = 'https://api.foursquare.com/v2/venues/' + foursquareid + '/tips?sort=recent&limit=5&v=20150609&client_id=4EPS21I4V4MVCYXWDT4QNZZG1JETWZ2LIJMYQ34FNBWZ1RMV&client_secret=U3P1XLU204VMYO4BHGIWPDOY130Z1AFTT1OQTI2TY0HW0T43';
 			var foursquarephotos = 'https://api.foursquare.com/v2/venues/' + foursquareid + '/photos?sort=recent&limit=5&v=20150609&client_id=4EPS21I4V4MVCYXWDT4QNZZG1JETWZ2LIJMYQ34FNBWZ1RMV&client_secret=U3P1XLU204VMYO4BHGIWPDOY130Z1AFTT1OQTI2TY0HW0T43';
-			// console.log(foursquareurl)
-			// return foursquareurl;
 
+			// get Four Square tips of venue
 			$.getJSON(foursquareurl,
 				function(data) {
 				$.each(data.response.tips.items, function(i, tips){
-					topTips.push('<li>' + tips.text + '</li>');
+					topTips.push('<li class="tips-results"><i class="fa-li fa fa-comments-o"></i>' + tips.text + '</li>');
 			});
 
 			}).done(function(){
-
-				self.comments = '<h3>5 Most Recent Comments</h3>' + '<ol class="tips">' + topTips.join('') + '</ol>';
+				// console.log(topTips);
+				// console.log(topTips.length);
+				if (topTips.length > 0) {
+					self.comments = '<h3>5 Most Recent Comments</h3>' + '<ul class="fa-ul">' + topTips.join('') + '</ul>';
+				} else {
+					self.comments = '<h3>No Recent Comments</h3>';
+				}
+				
 			}).fail(function(jqXHR, textStatus, errorThrown) {
 				self.comments = '<h3>5 Most Recent Comments</h3>' + '<h4>Oops. There was a problem retrieving this location\'s comments.</h4>';				
 				console.log('getJSON request failed! ' + textStatus);
 			});
 
-
+			// get Four Square Photos of venue
 			$.getJSON(foursquarephotos,
-			function(data) {
-				console.log(data.response.photos.items)
+				function(data) {
+				// console.log(data.response.photos.items)
 				$.each(data.response.photos.items, function(i, photos){
-					self.photo = photos.prefix + '200x200' + photos.suffix;
-					console.log(self.photo);
+					self.photo = photos.prefix + '100x100' + photos.suffix;
+					self.photoNum = data.response.photos.items.length;
+					recPhotos.push('<img src="' + self.photo + '">');
+					console.log(recPhotos);
+					// console.log(self.photo);
+					console.log('end');
+					// console.log(self.photoNum);
 				});
 			}).done(function(){
-				self.photos = '<img src="' + self.photo + '">';
+				if (recPhotos.length > 0) {
+					self.photos = recPhotos.join('');
+				} else {
+					self.photos = '';
+				}
 			}).fail(function(jqXHR, textStatus, errorThrown) {
 				self.photos = '<h4>Oops. There was a problem retrieving this location\'s photos.</h4>';				
 				console.log('getJSON request failed! ' + textStatus);
